@@ -112,6 +112,8 @@ def coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, tree, num
         current_samples.append(len(labels))
         current_labels.append(labels)
         used_times.append(time)
+        if total_inf_dict[time] >= 50000:
+            break
 
     coalescent_timing_results = [used_times, heights, total_inf, current_inf, current_samples]
     return coalescent_timing_results
