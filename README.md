@@ -8,10 +8,10 @@ Unpack the data into a subdirectory `simulations`:
 mkdir -p ./simulations
 for i in {1..20}; do batch="simulations_$(printf "%02d" $i)"; unzip "$batch.zip" && mv ./"$batch"/* ./simulations && rmdir ./"$batch"; done
 ```
-Get [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/Resample-of-cladeAnalysis_stableCoalescence.py/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) and [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/Resample-of-cladeAnalysis_stableCoalescence.py/notebooks/cladeAnalysis.ipynb) from this branch:
+Get the corrected [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/Resample-with-corrected-stable-coalescence/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) and [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/Resample-with-corrected-stable-coalescence/notebooks/cladeAnalysis-corrected_sc.ipynb) from this branch:
 ```
-curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/Resample-of-cladeAnalysis_stableCoalescence.py/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py"
-curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/Resample-of-cladeAnalysis_stableCoalescence.py/notebooks/cladeAnalysis.ipynb"
+curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/Resample-with-corrected-stable-coalescence/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py"
+curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/Resample-with-corrected-stable-coalescence/notebooks/cladeAnalysis-corrected_sc.ipynb"
 ```
 Launch and run the notebook.
 
