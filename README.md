@@ -6,7 +6,7 @@ for i in {01..22}; do wget "https://zenodo.org/records/6899613/files/simulations
 Unpack the data into a subdirectory `simulations`:
 ```
 mkdir -p ./simulations
-for i in {1..20}; do batch="simulations_$(printf "%02d" $i)"; unzip "$batch.zip" && mv ./"$batch"/* ./simulations && rmdir ./"$batch"; done
+parallel 'unzip "{}" -d . && mv "{/.}"/* ./simulations && rmdir "{/.}"' ::: simulations_*.zip
 ```
 Get [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/Resample-of-cladeAnalysis_stableCoalescence.py/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) and [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/Resample-of-cladeAnalysis_stableCoalescence.py/notebooks/cladeAnalysis.ipynb) from this branch:
 ```
