@@ -31,7 +31,10 @@ make
 sudo mv coatran_constant /usr/local/bin/
 ```
 
-Launch and run the notebook.
+Launch the notebook. The number of processers to be used in parallel can be set with the `max_workers` parameter in cells 5 and 11. The note book can then be run to reproduce the result below.
+
+![]()
+
 
 ### Supplementary code for:
 
