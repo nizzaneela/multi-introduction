@@ -112,9 +112,21 @@ def coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, tree, num
         current_samples.append(len(labels))
         current_labels.append(labels)
         used_times.append(time)
-
+        # stop at 50,000 infections
+        if total_inf_dict[time] >= 50000: # stop when we reach 50,000 infections, as described in SM
+            break
+    # get the latest tMRCA, and then walk back back day as long as the tMRCA of the next earlier day
+    # is earlier than the ltaest tMRCA by less than one day
+    # or if the next earlier has only one sample, i.e. day doesn't have a tMRCA
+    end_tMRCA = heights[-1]
+    day = -1
+    while (0 <= (end_tMRCA - heights[day-1]) <= (1/365)) and current_samples[day-1] != 1:
+        day -= 1
+    # stable coalescence is the MRCA of that day
+    stable_coalescence = tree.mrca(current_labels[day])
+    # return the actual stable coalescence
     coalescent_timing_results = [used_times, heights, total_inf, current_inf, current_samples]
-    return coalescent_timing_results
+    return stable_coalescence, coalescent_timing_results
 
 
 def clade_size(tree):
@@ -237,12 +249,12 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num_days', required=False, type=int, default=100, help='Number of days in simulation')
     parser.add_argument('-s', '--sub_rate', required=True, type=float, help="substitution rate")
     parser.add_argument('-m', '--mutations', required=True, type=int, help="number of mutations for clade analysis")
-    parser.add_argument('-o', '--output', required=True, type=str, help="output directory")
+    parser.add_argument('-id', '--sim_id', required=True, type=str, help="output directory")
+    parser.add_argument('-seed', '--random_seed', required=True, type=int, help="RNG seed for reproducibility", default=None)
     args,unknown = parser.parse_known_args()
 
-    directory = args.output
-    if directory.lower().endswith('/'):
-        directory = directory[:-1]
+    # Set the RNG seed
+    rng.seed(args.random_seed)
 
     # identify index case
     if args.gemf.endswith('.gz'):
@@ -263,96 +275,59 @@ if __name__ == "__main__":
     tree = treeswift.read_tree_newick(args.time_tree)
     subtree_leaves = []
     for n in tree.traverse_leaves():
-        if index_case not in n.label:
+        if index_case != n.label.split('|')[1]:
             subtree_leaves.append(n.label)
     subtree = tree.extract_tree_with(subtree_leaves)
     subtree.suppress_unifurcations()
 
     # stable coalescence
     time_inf_dict, current_inf_dict, total_inf_dict = tn_to_time_inf_dict(args.transmission_network, subtree)
-    coal_timing = coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, subtree, args.num_days)
+    stable_coalescence, coal_timing = coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, subtree, args.num_days)
 
     # prepare for clade analysis; get the subtree with the stable coalescence (MRCA) root
-    eps = 1e-8
-    stable_coalescence = coal_timing[1][-1]
-    subtree_sc_leaves = []
-    for n in subtree.distances_from_root():
-        if abs(n[1] - stable_coalescence) < eps:
-            # print(n[0].label)
-            subtree_sc_leaves += [n.label for n in subtree.extract_subtree(n[0]).traverse_leaves()]
-    subtree_sc_leaves = set(subtree_sc_leaves)
-    subtree_sc = tree.extract_tree_with(subtree_sc_leaves)
-    # print(subtree.num_nodes(internal=False), subtree_sc.num_nodes(internal=False))
+    subtree_sc = tree.extract_subtree(stable_coalescence)
     subtree_sc.root.edge_length = 0
     subtree_sc.suppress_unifurcations()
 
-    # determine clade sizes, simulate mutations, and get 1-mutation clades
+    # determine clade sizes,
     clade_size(subtree_sc)
-    mutation_simulation(subtree_sc.root, factor = args.sub_rate)
-    mutation_clade_sizes = sorted(get_mutation_clades(subtree_sc.root, args.mutations, include_unmutated_leaves=True), reverse=True)
+    for resample in range(1000):
+        # simulate mutations
+        mutation_simulation(subtree_sc.root, factor = args.sub_rate)
 
-    # what are the sizes of 2-mutation clades who parents have no mutations?
-    clades_2muts_0parentMuts = []
-    clades_2muts_0parentMuts_polytomy = []
-    for n in subtree_sc.traverse_internal():
-        if len(n.mutations) >= 2 and len(n.parent.mutations) == 0:
-            # print(n.mutations, n.parent.mutations, n.clade_size, n.edge_length)
-            clades_2muts_0parentMuts.append(n.clade_size)
-            clades_2muts_0parentMuts_polytomy.append([n.clade_size, sorted(get_mutation_clades(n, args.mutations, root_mutations=len(n.mutations), include_unmutated_leaves=True), reverse=True)])
-    # print(clades_2muts_0parentMuts)
+        # what are the sizes of 2-mutation clades who parents have no mutations?
+        clades_2muts_0parentMuts_polytomy = []
+        for n in subtree_sc.traverse_internal():
+            if len(n.mutations) >= 2 and len(n.parent.mutations) == 0:
+                clades_2muts_0parentMuts_polytomy.append([n.clade_size, sorted(get_mutation_clades(n, args.mutations, root_mutations=len(n.mutations), include_unmutated_leaves=True), reverse=True)])
 
-    # How many basal taxa, unique tips, and clades are descendant a given node (stable coalescence, or for C/C)? 
-    #    -> How many 0-mutation tips, 1-or-more-mutation tips, and 1-or-more-mutation internal nodes are there?
-    clades_polytomy = []
-    clades_polytomy_CC = []
-    for n in subtree_sc.traverse_rootdistorder():
-        if n[1].is_root():
-            continue
-        elif len(n[1].parent.mutations) > 0:
-            continue 
-        elif n[1].is_leaf():
-            clades_polytomy.append(n[1].clade_size)
-            # clades_polytomy_CC.append([n[1].clade_size])
-            clades_polytomy_CC.append([n[1].clade_size, [n[1].clade_size]])
-        elif not n[1].is_leaf() and len(n[1].mutations) > 0:
-            clades_polytomy.append(n[1].clade_size)
-            clades_polytomy_CC.append([n[1].clade_size, sorted(get_mutation_clades(n[1], args.mutations, root_mutations=len(n[1].mutations), include_unmutated_leaves=True), reverse=True)])
-            # print(len(n[1].children))
+        # How many 0-mutation tips, 1-or-more-mutation tips, and 1-or-more-mutation internal nodes are there?
+        clades_polytomy_CC = []
+        for n in subtree_sc.traverse_rootdistorder():
+            if n[1].is_root():
+                continue
+            elif len(n[1].parent.mutations) > 0:
+                continue
+            elif n[1].is_leaf():
+                clades_polytomy_CC.append([n[1].clade_size, [n[1].clade_size]])
+            elif not n[1].is_leaf() and len(n[1].mutations) > 0:
+                clades_polytomy_CC.append([n[1].clade_size, sorted(get_mutation_clades(n[1], args.mutations, root_mutations=len(n[1].mutations), include_unmutated_leaves=True), reverse=True)])
 
-    # write results
-    OUTPUT_subtree = directory + '/stable_coalescence_subtree.newick'
-    OUTPUT_coal = directory + '/coalData_parameterized.txt'
-    OUTPUT_CC_polytomy_clade = directory + '/clade_analysis_CC_polytomy.txt'
-    OUTPUT_linAB_polytomy_clade = directory + '/clade_analysis_AB_polytomy.txt'
+        # write resample results
+        OUTPUT_CC_polytomy_clade = 'resamples/' + str(resample) + '/clade_analyses_CC/' + args.sim_id + '_one_mutation_subclades.txt'
+        OUTPUT_linAB_polytomy_clade = 'resamples/' + str(resample) + '/clade_analyses_AB/' + args.sim_id + '_two_mutation_subclades.txt'
+        with open(OUTPUT_CC_polytomy_clade, 'w') as f:
+            for clade in clades_polytomy_CC:
+                f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
+        with open(OUTPUT_linAB_polytomy_clade, 'w') as f:
+            for clade in clades_2muts_0parentMuts_polytomy:
+                f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
+
+    # simulation results
+    OUTPUT_subtree = 'simulations/' + args.sim_id + '/corrected_subtree.newick'
+    OUTPUT_coal = 'simulations/' + args.sim_id + '/corrected_coalData_parameterized.txt'
     subtree.write_tree_newick(OUTPUT_subtree)
-    # old results
-    OUTPUT_polytomy_clade = directory + '/clade_analysis_polytomy.txt'
-    OUTPUT_CC_clade = directory + '/clade_analysis_CC.txt'
-    OUTPUT_linAB_clade = directory + '/clade_analysis_AB.txt'
-
     with open(OUTPUT_coal, 'w') as f:
         f.write('time\tcoalescence time\ttotal infected\tcurrently infected\tcurrent samples\n')
         for index, i in enumerate(coal_timing[0]):
             f.write('%s\t%s\t%s\t%s\t%s\n' % (coal_timing[0][index], coal_timing[1][index], coal_timing[2][index], coal_timing[3][index], coal_timing[4][index]))
-
-    with open(OUTPUT_CC_polytomy_clade, 'w') as f:
-        for clade in clades_polytomy_CC:
-            f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
-
-    with open(OUTPUT_linAB_polytomy_clade, 'w') as f:
-        for clade in clades_2muts_0parentMuts_polytomy:
-            f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
-
-    # old results
-    with open(OUTPUT_polytomy_clade, 'w') as f:
-        for clade in clades_polytomy:
-            f.write('%i\n' % clade)
-            
-    with open(OUTPUT_CC_clade, 'w') as f:
-        for clade in mutation_clade_sizes:
-            f.write('%i\n' % clade)
-
-    with open(OUTPUT_linAB_clade, 'w') as f:
-        for clade in clades_2muts_0parentMuts:
-            f.write('%i\n' % clade)
-
