@@ -1,4 +1,4 @@
-### Modified code to fix errors and suppress noise
+### Modified code to fix errors, suppress noise and correct the inconsistency in the clade size requirement
 
 [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/corrected/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) is modified to correct determination of the stable coalescence, and to resample the mutation simulation 1000 times.
 
@@ -17,10 +17,10 @@ mkdir -p ./simulations
 parallel 'unzip "{}" -d . && mv "{/.}"/* ./simulations && rmdir "{/.}"' ::: simulations_*.zip
 ```
 
-Get [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/corrected/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) and [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/corrected/notebooks/cladeAnalysis.ipynb) from this branch:
+Get [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/corrected_with_relative_size_condition/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) and [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/corrected_with_relative_size_condition/notebooks/cladeAnalysis.ipynb) from this branch:
 ```
-curl -L -o stableCoalescence_cladeAnalysis.py "https://raw.githubusercontent.com/nizzaneela/multi-introduction/corrected/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py"
-curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/corrected/notebooks/cladeAnalysis.ipynb"
+curl -L -o stableCoalescence_cladeAnalysis.py "https://raw.githubusercontent.com/nizzaneela/multi-introduction/corrected_with_relative_size_condition/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py"
+curl -L -o cladeAnalysis.ipynb "https://raw.githubusercontent.com/nizzaneela/multi-introduction/corrected_with_relative_size_condition/notebooks/cladeAnalysis.ipynb"
 ```
 
 Get `coatran_constant` from [CoaTran](https://github.com/niemasd/CoaTran/tree/main):
@@ -33,7 +33,7 @@ sudo mv coatran_constant /usr/local/bin/
 
 Launch the notebook. The number of processers to be used in parallel can be set with the `max_workers` parameter in cells 5 and 11. The note book can then be run to reproduce the result below.
 
-![](https://github.com/nizzaneela/multi-introduction/blob/38cc2dea2b2c4db98fea6b4965fffb03f3500d03/results.png)
+![](results.png)
 
 
 ### Supplementary code for:
