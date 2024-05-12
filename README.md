@@ -1,4 +1,4 @@
-### Modified code to fix errors, suppress noise and correct the inconsistency in the clade size and separateion requirements
+### Modified code to fix errors, suppress noise and correct the inconsistency in the clade size and separation requirements
 
 [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/corrected/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) is modified to correct determination of the stable coalescence, to resample the mutation simulation 1000 times, and add output of root mutations and clade analysis results for exactly two mutation separation.
 
@@ -33,7 +33,49 @@ sudo mv coatran_constant /usr/local/bin/
 
 Launch the notebook. The number of processers to be used in parallel can be set with the `max_workers` parameter in cells 5 and 11. The note book can then be run to reproduce the result below.
 
-![](results.png)
+### recCA rooting, separation of two or more mutations
+|  |$t_2$ = 0 days | $t_2$ = 1 day | $t_2$ = 2 days | $t_2$ = 4 days | $t_2$ = 7 days | $t_2$ = 14 days | $t_2$ = 28 days |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $t_1$ **= 0 days** |0.21 | 0.22 | 0.23 | 0.23 | 0.23 | 0.21 | 0.16 |
+| $t_1$ **= 1 day** |0.23 | 0.24 | 0.25 | 0.25 | 0.25 | 0.21 | 0.17 |
+| $t_1$ **= 2 days** |0.24 | 0.24 | 0.24 | 0.25 | 0.24 | 0.22 | 0.17 |
+| $t_1$ **= 4 days** |0.25 | 0.26 | 0.25 | 0.26 | 0.26 | 0.22 | 0.16 |
+| $t_1$ **= 7 days** |0.26 | 0.27 | 0.26 | 0.26 | 0.26 | 0.21 | 0.16 |
+| $t_1$ **= 14 days** |0.27 | 0.27 | 0.26 | 0.26 | 0.24 | 0.21 | 0.16 |
+| $t_1$ **= 28 days** |0.24 | 0.24 | 0.24 | 0.24 | 0.23 | 0.19 | 0.14 |
+
+### unconstrained rooting, separation of two or more mutations
+|  |$t_2$ = 0 days | $t_2$ = 1 day | $t_2$ = 2 days | $t_2$ = 4 days | $t_2$ = 7 days | $t_2$ = 14 days | $t_2$ = 28 days |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $t_1$ **= 0 days** |0.21 | 0.21 | 0.22 | 0.23 | 0.22 | 0.20 | 0.16 |
+| $t_1$ **= 1 day** |0.22 | 0.23 | 0.24 | 0.24 | 0.24 | 0.20 | 0.16 |
+| $t_1$ **= 2 days** |0.23 | 0.23 | 0.23 | 0.24 | 0.23 | 0.21 | 0.16 |
+| $t_1$ **= 4 days** |0.24 | 0.25 | 0.24 | 0.25 | 0.25 | 0.21 | 0.15 |
+| $t_1$ **= 7 days** |0.25 | 0.26 | 0.25 | 0.24 | 0.25 | 0.20 | 0.15 |
+| $t_1$ **= 14 days** |0.25 | 0.25 | 0.24 | 0.24 | 0.22 | 0.19 | 0.14 |
+| $t_1$ **= 28 days** |0.22 | 0.22 | 0.22 | 0.22 | 0.20 | 0.17 | 0.13 |
+
+### recCA rooting, separation of exactly two mutations
+|  |$t_2$ = 0 days | $t_2$ = 1 day | $t_2$ = 2 days | $t_2$ = 4 days | $t_2$ = 7 days | $t_2$ = 14 days | $t_2$ = 28 days |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $t_1$ **= 0 days** |0.16 | 0.16 | 0.17 | 0.17 | 0.16 | 0.13 | 0.10 |
+| $t_1$ **= 1 day** |0.17 | 0.17 | 0.18 | 0.17 | 0.17 | 0.13 | 0.10 |
+| $t_1$ **= 2 days** |0.18 | 0.17 | 0.17 | 0.17 | 0.16 | 0.13 | 0.09 |
+| $t_1$ **= 4 days** |0.17 | 0.17 | 0.17 | 0.17 | 0.16 | 0.13 | 0.08 |
+| $t_1$ **= 7 days** |0.16 | 0.17 | 0.16 | 0.15 | 0.15 | 0.11 | 0.07 |
+| $t_1$ **= 14 days** |0.14 | 0.14 | 0.13 | 0.12 | 0.11 | 0.09 | 0.06 |
+| $t_1$ **= 28 days** |0.09 | 0.09 | 0.09 | 0.09 | 0.08 | 0.06 | 0.04 |
+
+### unconstrained rooting, separation of exactly two mutations
+|  |$t_2$ = 0 days | $t_2$ = 1 day | $t_2$ = 2 days | $t_2$ = 4 days | $t_2$ = 7 days | $t_2$ = 14 days | $t_2$ = 28 days |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $t_1$ **= 0 days** |0.16 | 0.16 | 0.16 | 0.16 | 0.15 | 0.13 | 0.09 |
+| $t_1$ **= 1 day** |0.17 | 0.17 | 0.18 | 0.17 | 0.16 | 0.13 | 0.10 |
+| $t_1$ **= 2 days** |0.17 | 0.17 | 0.17 | 0.17 | 0.15 | 0.13 | 0.09 |
+| $t_1$ **= 4 days** |0.17 | 0.17 | 0.16 | 0.17 | 0.16 | 0.13 | 0.08 |
+| $t_1$ **= 7 days** |0.16 | 0.17 | 0.16 | 0.15 | 0.14 | 0.11 | 0.07 |
+| $t_1$ **= 14 days** |0.14 | 0.14 | 0.13 | 0.12 | 0.11 | 0.09 | 0.06 |
+| $t_1$ **= 28 days** |0.09 | 0.09 | 0.09 | 0.08 | 0.07 | 0.06 | 0.04 |
 
 
 ### Supplementary code for:
