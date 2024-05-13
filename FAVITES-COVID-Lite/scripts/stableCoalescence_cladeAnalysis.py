@@ -126,7 +126,7 @@ def coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, tree, num
     stable_coalescence = tree.mrca(current_labels[day])
     # return the actual stable coalescence
     coalescent_timing_results = [used_times, heights, total_inf, current_inf, current_samples]
-    return stable_coalescence, coalescent_timing_results
+    return heights[day], stable_coalescence, coalescent_timing_results
 
 
 def clade_size(tree):
@@ -282,7 +282,7 @@ if __name__ == "__main__":
 
     # stable coalescence
     time_inf_dict, current_inf_dict, total_inf_dict = tn_to_time_inf_dict(args.transmission_network, subtree)
-    stable_coalescence, coal_timing = coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, subtree, args.num_days)
+    tSC, stable_coalescence, coal_timing = coalescent_timing(time_inf_dict, current_inf_dict, total_inf_dict, subtree, args.num_days)
 
     # prepare for clade analysis; get the subtree with the stable coalescence (MRCA) root
     subtree_sc = tree.extract_subtree(stable_coalescence)
@@ -313,15 +313,46 @@ if __name__ == "__main__":
             elif not n[1].is_leaf() and len(n[1].mutations) > 0:
                 clades_polytomy_CC.append([n[1].clade_size, sorted(get_mutation_clades(n[1], args.mutations, root_mutations=len(n[1].mutations), include_unmutated_leaves=True), reverse=True)])
 
+        #same again but exact
+        # what are the sizes of 2-mutation clades who parents have no mutations?
+        clades_2muts_0parentMuts_polytomy_exact = []
+        for n in subtree_sc.traverse_internal():
+            if len(n.mutations) == 2 and len(n.parent.mutations) == 0:
+                clades_2muts_0parentMuts_polytomy_exact.append([n.clade_size, sorted(get_mutation_clades(n, args.mutations, root_mutations=len(n.mutations), include_unmutated_leaves=True), reverse=True)])
+
+        # How many 0-mutation tips, 1-or-more-mutation tips, and 1-or-more-mutation internal nodes are there?
+        clades_polytomy_CC_exact = []
+        for n in subtree_sc.traverse_rootdistorder():
+            if n[1].is_root():
+                continue
+            elif n[1].is_leaf():
+                clades_polytomy_CC.append([n[1].clade_size, [n[1].clade_size]])
+            elif len(n[1].mutations) == 1 and len(n[1].parent.mutations) == 0:
+                clades_polytomy_CC_exact.append([n[1].clade_size, sorted(get_mutation_clades(n[1], args.mutations, root_mutations=len(n[1].mutations), include_unmutated_leaves=True), reverse=True)])
+
+
         # write resample results
         OUTPUT_CC_polytomy_clade = 'resamples/' + str(resample) + '/clade_analyses_CC/' + args.sim_id + '_one_mutation_subclades.txt'
         OUTPUT_linAB_polytomy_clade = 'resamples/' + str(resample) + '/clade_analyses_AB/' + args.sim_id + '_two_mutation_subclades.txt'
+        OUTPUT_CC_polytomy_clade_exact = 'resamples/' + str(resample) + '/clade_analyses_CC_exact/' + args.sim_id + '_one_mutation_subclades.txt'
+        OUTPUT_linAB_polytomy_clade_exact = 'resamples/' + str(resample) + '/clade_analyses_AB_exact/' + args.sim_id + '_two_mutation_subclades.txt'
         with open(OUTPUT_CC_polytomy_clade, 'w') as f:
             for clade in clades_polytomy_CC:
                 f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
         with open(OUTPUT_linAB_polytomy_clade, 'w') as f:
             for clade in clades_2muts_0parentMuts_polytomy:
                 f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
+        with open(OUTPUT_CC_polytomy_clade_exact, 'w') as f:
+            for clade in clades_polytomy_CC_exact:
+                f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
+        with open(OUTPUT_linAB_polytomy_clade_exact, 'w') as f:
+            for clade in clades_2muts_0parentMuts_polytomy_exact:
+                f.write('%s %s\n' % (str(clade[0]), str(clade[1])))
+        # print root mutations
+        OUTPUT_root_muts = 'resamples/' + str(resample) + '/' + args.sim_id + '_root_mutations.txt'
+        with open(OUTPUT_root_muts, 'w') as f:
+            f.write(str(rng.poisson(tSC*0.00092*29903)))
+
 
     # simulation results
     OUTPUT_subtree = 'simulations/' + args.sim_id + '/corrected_subtree.newick'
