@@ -1,8 +1,8 @@
 ### Modified code to fix errors, suppress noise and correct the inconsistency in the clade size and separation requirements
 
-Implements corrections set out in comments [#11](https://pubpeer.com/publications/3FB983CC74C0A93394568A373167CE#11) onward in the PubPeer [thread](https://pubpeer.com/publications/3FB983CC74C0A93394568A373167CE#).
+Implements corrections set out in comments [#11](https://pubpeer.com/publications/3FB983CC74C0A93394568A373167CE#11), [#12](https://pubpeer.com/publications/3FB983CC74C0A93394568A373167CE#11) and [#15](https://pubpeer.com/publications/3FB983CC74C0A93394568A373167CE#15).
 
-Also corrects the inconsistency in the separation constraint (yet to be published on PubPeer). 
+If there a problems reading the jupyter notebook [cladeAnalysis.ipynb](https://github.com/nizzaneela/multi-introduction/blob/corrected_with_relative_size_and_separation_conditions/notebooks/cladeAnalysis.ipynb) on GitHub's browser interface, please inform nizzaneela@fastmail.com. Any other problems should also be reported to the same email.
 
 [stableCoalescence_cladeAnalysis.py](https://github.com/nizzaneela/multi-introduction/blob/corrected_with_relative_size_and_separation_conditions/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) is modified from the [original](https://github.com/niemasd/multi-introduction/blob/main/FAVITES-COVID-Lite/scripts/stableCoalescence_cladeAnalysis.py) to correct determination of the stable coalescence, to resample the mutation simulation 1000 times, and output root mutations and additional clade data for a separation constraint of exactly two mutations (the original applied a separation constraint of two or mutations, which seems inconsistent with the text).
 
