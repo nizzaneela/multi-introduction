@@ -325,8 +325,10 @@ if __name__ == "__main__":
         for n in subtree_sc.traverse_rootdistorder():
             if n[1].is_root():
                 continue
+            elif len(n[1].parent.mutations) > 0:
+                continue
             elif n[1].is_leaf():
-                clades_polytomy_CC.append([n[1].clade_size, [n[1].clade_size]])
+                clades_polytomy_CC_exact.append([n[1].clade_size, [n[1].clade_size]])
             elif len(n[1].mutations) == 1 and len(n[1].parent.mutations) == 0:
                 clades_polytomy_CC_exact.append([n[1].clade_size, sorted(get_mutation_clades(n[1], args.mutations, root_mutations=len(n[1].mutations), include_unmutated_leaves=True), reverse=True)])
 
